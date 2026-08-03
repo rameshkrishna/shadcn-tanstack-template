@@ -1,11 +1,22 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { HeadContent, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
-import { ThemeProvider } from "@/components/theme-provider"
-
 import appCss from "../styles.css?url"
+import type { QueryClient } from "@tanstack/react-query"
+import { ThemeProvider } from "@/components/theme-provider"
+import { AppNav } from "@/components/app-nav"
+import { AppSidebar } from "@/components/app-sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/sonner"
+import { channelListingsQueryOptions, productsQueryOptions } from "@/lib/queries"
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(productsQueryOptions()),
+      context.queryClient.ensureQueryData(channelListingsQueryOptions()),
+    ])
+  },
   head: () => ({
     meta: [
       {
@@ -16,7 +27,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Sterling Luxe Inventory",
       },
     ],
     links: [
@@ -42,7 +53,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <AppNav />
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+          <Toaster />
         </ThemeProvider>
         <TanStackDevtools
           config={{

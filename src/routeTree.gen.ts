@@ -9,38 +9,84 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Import_productsRouteImport } from './routes/import_products'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProductsProductIdRouteImport } from './routes/products.$productId'
+import { Route as ApiDownloadImagesRouteImport } from './routes/api/download-images'
 
+const Import_productsRoute = Import_productsRouteImport.update({
+  id: '/import_products',
+  path: '/import_products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsProductIdRoute = ProductsProductIdRouteImport.update({
+  id: '/products/$productId',
+  path: '/products/$productId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDownloadImagesRoute = ApiDownloadImagesRouteImport.update({
+  id: '/api/download-images',
+  path: '/api/download-images',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/import_products': typeof Import_productsRoute
+  '/api/download-images': typeof ApiDownloadImagesRoute
+  '/products/$productId': typeof ProductsProductIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/import_products': typeof Import_productsRoute
+  '/api/download-images': typeof ApiDownloadImagesRoute
+  '/products/$productId': typeof ProductsProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/import_products': typeof Import_productsRoute
+  '/api/download-images': typeof ApiDownloadImagesRoute
+  '/products/$productId': typeof ProductsProductIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/import_products'
+    | '/api/download-images'
+    | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/import_products' | '/api/download-images' | '/products/$productId'
+  id:
+    | '__root__'
+    | '/'
+    | '/import_products'
+    | '/api/download-images'
+    | '/products/$productId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  Import_productsRoute: typeof Import_productsRoute
+  ApiDownloadImagesRoute: typeof ApiDownloadImagesRoute
+  ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/import_products': {
+      id: '/import_products'
+      path: '/import_products'
+      fullPath: '/import_products'
+      preLoaderRoute: typeof Import_productsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +94,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products/$productId': {
+      id: '/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof ProductsProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/download-images': {
+      id: '/api/download-images'
+      path: '/api/download-images'
+      fullPath: '/api/download-images'
+      preLoaderRoute: typeof ApiDownloadImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  Import_productsRoute: Import_productsRoute,
+  ApiDownloadImagesRoute: ApiDownloadImagesRoute,
+  ProductsProductIdRoute: ProductsProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

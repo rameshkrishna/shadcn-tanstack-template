@@ -12,3 +12,7 @@ count.txt
 .vinxi
 __unconfig*
 todos.json
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
