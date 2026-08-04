@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto"
 import { gunzipSync } from "node:zlib"
 import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm"
 import type { ImportMode, Product, ProductStatus } from "@/types/product"
+import { db } from "@/server/db/client"
+import { products } from "@/server/db/schema"
 
 /**
  * Mirrors core/stages/discover.py (SterlingLuxeCo/jewelpipe): fetch a sitemap
@@ -491,4 +494,40 @@ export const scrapeImportUrl = createServerFn({ method: "POST" })
     const product = await buildProduct(url, url, vendorName)
     if (!product) throw new Error("Couldn't find product data on that page")
     return [product]
+  })
+
+// Re-fetches a single already-imported product from its original sourceUrl
+// and overwrites the fields that drift over time (price, stock, status,
+// description, image). id/sku/vendorName/importUrl/sourceUrl/importedAt are
+// left alone — sku in particular is relied on elsewhere (image folder
+// matching, Etsy vendor_sku) and shouldn't silently change under a listing
+// that's already been set up.
+export const resyncProduct = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }): Promise<Product> => {
+    const row = db.select().from(products).where(eq(products.id, data.id)).get()
+    if (!row) throw new Error("Product not found")
+    if (!row.sourceUrl) throw new Error("This product has no source URL to resync from")
+
+    const fresh = await buildProduct(row.sourceUrl, row.importUrl, row.vendorName)
+    if (!fresh) throw new Error("Couldn't find product data on that page anymore")
+
+    const patch = {
+      name: fresh.name,
+      category: fresh.category,
+      description: fresh.description,
+      imageUrl: fresh.imageUrl,
+      price: fresh.price,
+      currency: fresh.currency,
+      stock: fresh.stock,
+      status: fresh.status,
+    }
+    db.update(products).set(patch).where(eq(products.id, data.id)).run()
+
+    return {
+      ...row,
+      ...patch,
+      imagePrompt: row.imagePrompt ?? undefined,
+      imagePromptGeneratedAt: row.imagePromptGeneratedAt ?? undefined,
+    }
   })

@@ -27,6 +27,7 @@ import {
   Loader2,
   PackageSearch,
   PencilLine,
+  RefreshCw,
   Search,
   Sparkles,
   Store,
@@ -93,7 +94,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { downloadCsv } from "@/lib/csv-export"
-import { removeProducts, updateProduct } from "@/lib/product-store"
+import { removeProducts, resyncProduct, updateProduct } from "@/lib/product-store"
 import {
   getEtsyCopyBatchResults,
   getEtsyCopyBatchStatus,
@@ -194,6 +195,7 @@ function BulkJobDialog({
   title,
   description,
   statusNote,
+  workingLabel = "Generating…",
   onClose,
 }: {
   open: boolean
@@ -202,6 +204,7 @@ function BulkJobDialog({
   title: string
   description: string
   statusNote?: string
+  workingLabel?: string
   onClose: () => void
 }) {
   return (
@@ -240,7 +243,7 @@ function BulkJobDialog({
                     {job.status === "generating" && (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-muted-foreground">Generating…</span>
+                        <span className="text-muted-foreground">{workingLabel}</span>
                       </>
                     )}
                     {job.status === "done" && <CheckCircle2 className="h-4 w-4 text-green-500" />}
@@ -463,6 +466,9 @@ export function ProductTable({
   const [imagePromptStatusNote, setImagePromptStatusNote] = useState("")
   const [imagesDownloading, setImagesDownloading] = useState(false)
   const [bulkEditOpen, setBulkEditOpen] = useState(false)
+  const [resyncDialogOpen, setResyncDialogOpen] = useState(false)
+  const [resyncRunning, setResyncRunning] = useState(false)
+  const [resyncJobs, setResyncJobs] = useState<Array<BulkJobResult>>([])
 
   const table = useReactTable({
     data: products,
@@ -554,6 +560,40 @@ export function ProductTable({
     await removeProducts(ids)
     setRowSelection({})
     toast.success(`Deleted ${ids.length} product${ids.length === 1 ? "" : "s"}`)
+  }
+
+  async function handleResyncSelected() {
+    const targets = selectedRows.map((r) => r.original)
+    setResyncDialogOpen(true)
+    setResyncRunning(true)
+    setResyncJobs(targets.map((p) => ({ productId: p.id, productName: p.name, status: "pending" })))
+
+    function setJob(productId: string, patch: Partial<BulkJobResult>) {
+      setResyncJobs((prev) => prev.map((job) => (job.productId === productId ? { ...job, ...patch } : job)))
+    }
+
+    let successCount = 0
+    for (const product of targets) {
+      setJob(product.id, { status: "generating" })
+      try {
+        await resyncProduct(product.id)
+        setJob(product.id, { status: "done" })
+        successCount += 1
+      } catch (error) {
+        setJob(product.id, {
+          status: "error",
+          error: error instanceof Error ? error.message : "Resync failed",
+        })
+      }
+    }
+
+    setResyncRunning(false)
+    if (successCount > 0) {
+      toast.success(`Resynced ${successCount} product${successCount === 1 ? "" : "s"}`)
+    }
+    if (successCount < targets.length) {
+      toast.error(`Failed to resync ${targets.length - successCount} product(s)`)
+    }
   }
 
   async function handleGenerateEtsyCopy() {
@@ -893,6 +933,20 @@ export function ProductTable({
                     <PencilLine className="h-4 w-4" />
                     Bulk Edit
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    disabled={resyncRunning}
+                    onClick={handleResyncSelected}
+                  >
+                    {resyncRunning ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    Resync
+                  </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="gap-2">
@@ -1098,6 +1152,19 @@ export function ProductTable({
         statusNote={imagePromptStatusNote}
         onClose={() => {
           setImagePromptDialogOpen(false)
+          setRowSelection({})
+        }}
+      />
+
+      <BulkJobDialog
+        open={resyncDialogOpen}
+        running={resyncRunning}
+        jobs={resyncJobs}
+        title="Resyncing products"
+        description="Re-fetching each product's page to refresh price, stock, status, description, and image from the source."
+        workingLabel="Resyncing…"
+        onClose={() => {
+          setResyncDialogOpen(false)
           setRowSelection({})
         }}
       />

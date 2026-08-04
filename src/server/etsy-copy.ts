@@ -16,7 +16,7 @@ interface EtsyCopyGenerationResult {
 
 const ETSY_MAX_TAGS = 13
 const ETSY_TAG_MAX_LENGTH = 20
-const ETSY_MAX_MATERIALS = 13
+const ETSY_MAX_MATERIALS = 5
 
 const RESPONSE_SCHEMA = {
   type: "object",
