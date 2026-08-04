@@ -1,9 +1,14 @@
 import { createRouter as createTanStackRouter } from "@tanstack/react-router"
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query"
 import { routeTree } from "./routeTree.gen"
-import { queryClient } from "@/lib/query-client"
+import { createQueryClient, setBrowserQueryClient } from "@/lib/query-client"
 
 export function getRouter() {
+  const queryClient = createQueryClient()
+  if (typeof window !== "undefined") {
+    setBrowserQueryClient(queryClient)
+  }
+
   const router = createTanStackRouter({
     routeTree,
 

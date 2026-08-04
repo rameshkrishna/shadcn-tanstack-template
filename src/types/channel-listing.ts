@@ -61,3 +61,8 @@ export interface ChannelListingPatch {
   overrides?: ChannelListingOverrides
   fields?: Partial<EtsyListingFields>
 }
+
+// The subset of EtsyListingFields that's the same across every new listing
+// rather than generated per-product — tags/materials are AI-generated or
+// hand-written per listing, so they're excluded here.
+export type EtsyDefaultFields = Omit<EtsyListingFields, "tags" | "materials">

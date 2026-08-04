@@ -1,7 +1,17 @@
 import { useMemo } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { motion } from "framer-motion"
-import { Boxes, DollarSign, PackageSearch, TriangleAlert, Upload } from "lucide-react"
+import {
+  Boxes,
+  CalendarDays,
+  DollarSign,
+  Flame,
+  PackageSearch,
+  Target,
+  TrendingUp,
+  TriangleAlert,
+  Upload,
+} from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProductTable } from "@/components/product-table"
@@ -22,6 +32,12 @@ export const Route = createFileRoute("/")({
 function formatCurrency(value: number, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(value)
 }
+
+const DAILY_AVG_SALES = 350
+const PROFIT_PER_UNIT = 3
+const DAILY_PROFIT_GOAL = DAILY_AVG_SALES * PROFIT_PER_UNIT
+const MONTHLY_PROFIT_GOAL = DAILY_PROFIT_GOAL * 30
+const ANNUAL_PROFIT_GOAL = DAILY_PROFIT_GOAL * 365
 
 function Inventory() {
   const products = useProducts()
@@ -73,6 +89,65 @@ function Inventory() {
             Import Products
           </Link>
         </Button>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut", delay: 0.05 }}
+      >
+        <Card className="border-[#F1641E]/30 bg-gradient-to-br from-[#F1641E]/10 via-card/60 to-card/60 shadow-sm backdrop-blur-md">
+          <CardHeader className="flex flex-row items-center gap-2 pb-2">
+            <Flame className="h-5 w-5 text-[#F1641E]" />
+            <CardTitle className="text-sm font-medium text-[#F1641E]">Daily Motivation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex items-center gap-3">
+                <Target className="h-8 w-8 text-[#F1641E]" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Daily Avg Sales</div>
+                  <div className="text-xl font-bold">{DAILY_AVG_SALES} units</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <DollarSign className="h-8 w-8 text-[#F1641E]" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Profit / Unit</div>
+                  <div className="text-xl font-bold">{formatCurrency(PROFIT_PER_UNIT, "USD")}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Flame className="h-8 w-8 text-[#F1641E]" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Daily Profit Goal</div>
+                  <div className="text-xl font-bold">{formatCurrency(DAILY_PROFIT_GOAL, "USD")}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 border-t border-[#F1641E]/20 pt-4 sm:grid-cols-2">
+              <div className="flex items-center gap-3">
+                <CalendarDays className="h-8 w-8 text-[#F1641E]" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Monthly Profit Projection</div>
+                  <div className="text-xl font-bold">{formatCurrency(MONTHLY_PROFIT_GOAL, "USD")}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-[#F1641E]" />
+                <div>
+                  <div className="text-xs text-muted-foreground">Annual Profit Projection</div>
+                  <div className="text-xl font-bold">{formatCurrency(ANNUAL_PROFIT_GOAL, "USD")}</div>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm text-muted-foreground">
+              Hit {DAILY_AVG_SALES} sales today and bank {formatCurrency(DAILY_PROFIT_GOAL, "USD")} in profit. Keep pushing!
+            </p>
+          </CardContent>
+        </Card>
       </motion.div>
 
       <motion.div

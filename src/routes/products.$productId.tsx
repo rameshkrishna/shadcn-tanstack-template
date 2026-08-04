@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 import type { Product, ProductStatus } from "@/types/product"
-import type { EtsyListingFields } from "@/types/channel-listing"
+import type { EtsyDefaultFields, EtsyListingFields } from "@/types/channel-listing"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -49,12 +49,12 @@ import {
   upsertChannelListing,
   useChannelListing,
 } from "@/lib/channel-listing-store"
+import { useEtsyDefaults } from "@/lib/etsy-settings-store"
 import {
   COLOR_OPTIONS,
   RENEWAL_OPTIONS,
   WHEN_MADE_OPTIONS,
   WHO_MADE_OPTIONS,
-  defaultEtsyFields,
   resolvedDescription,
   resolvedPrice,
   resolvedQuantity,
@@ -104,9 +104,10 @@ interface EtsyFormState {
 
 function buildEtsyForm(
   product: Product,
-  listing: ReturnType<typeof useChannelListing>
+  listing: ReturnType<typeof useChannelListing>,
+  defaultFields: EtsyDefaultFields
 ): EtsyFormState {
-  const fields = listing?.fields ?? defaultEtsyFields()
+  const fields: EtsyListingFields = listing?.fields ?? { ...defaultFields, tags: [], materials: [] }
   return {
     vendorSku: listing ? resolvedVendorSku(product, listing) : product.sku,
     title: listing ? resolvedTitle(product, listing) : product.name,
@@ -125,6 +126,7 @@ function ProductDetail() {
   const navigate = useNavigate()
   const product = useProduct(productId)
   const etsyListing = useChannelListing(productId, "etsy")
+  const etsyDefaults = useEtsyDefaults()
   const [form, setForm] = useState<FormState | null>(null)
   const [etsyForm, setEtsyForm] = useState<EtsyFormState | null>(null)
   const [generatingEtsyCopy, setGeneratingEtsyCopy] = useState(false)
@@ -153,7 +155,7 @@ function ProductDetail() {
         imageUrl: product.imageUrl,
         imagePrompt: product.imagePrompt ?? "",
       })
-      setEtsyForm(buildEtsyForm(product, etsyListing))
+      setEtsyForm(buildEtsyForm(product, etsyListing, etsyDefaults))
     }
   }, [product?.id])
 
@@ -236,7 +238,7 @@ function ProductDetail() {
   async function handleRemoveEtsyListing() {
     if (!product) return
     await removeChannelListing(product.id, "etsy")
-    setEtsyForm(buildEtsyForm(product, undefined))
+    setEtsyForm(buildEtsyForm(product, undefined, etsyDefaults))
     toast.success("Removed from Etsy")
   }
 

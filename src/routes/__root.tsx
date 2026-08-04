@@ -8,13 +8,20 @@ import { AppNav } from "@/components/app-nav"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
-import { channelListingsQueryOptions, productsQueryOptions } from "@/lib/queries"
+import {
+  categoryPricingRulesQueryOptions,
+  channelListingsQueryOptions,
+  etsyDefaultsQueryOptions,
+  productsQueryOptions,
+} from "@/lib/queries"
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(productsQueryOptions()),
       context.queryClient.ensureQueryData(channelListingsQueryOptions()),
+      context.queryClient.ensureQueryData(etsyDefaultsQueryOptions()),
+      context.queryClient.ensureQueryData(categoryPricingRulesQueryOptions()),
     ])
   },
   head: () => ({

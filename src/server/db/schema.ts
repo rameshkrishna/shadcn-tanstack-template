@@ -1,6 +1,11 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import type { ProductStatus } from "@/types/product"
-import type { ChannelId, ChannelListingOverrides, EtsyListingFields } from "@/types/channel-listing"
+import type {
+  ChannelId,
+  ChannelListingOverrides,
+  EtsyDefaultFields,
+  EtsyListingFields,
+} from "@/types/channel-listing"
 
 export const products = sqliteTable("products", {
   id: text("id").primaryKey(),
@@ -30,5 +35,19 @@ export const channelListings = sqliteTable("channel_listings", {
   status: text("status").$type<"draft" | "ready" | "exported">().notNull(),
   overrides: text("overrides", { mode: "json" }).$type<ChannelListingOverrides>().notNull(),
   fields: text("fields", { mode: "json" }).$type<EtsyListingFields>().notNull(),
+  updatedAt: text("updated_at").notNull(),
+})
+
+export const channelDefaults = sqliteTable("channel_defaults", {
+  channel: text("channel").$type<ChannelId>().primaryKey(),
+  fields: text("fields", { mode: "json" }).$type<EtsyDefaultFields>().notNull(),
+  updatedAt: text("updated_at").notNull(),
+})
+
+export const categoryPricingRules = sqliteTable("category_pricing_rules", {
+  category: text("category").primaryKey(),
+  marginPercent: real("margin_percent").notNull().default(0),
+  vendorShippingRate: real("vendor_shipping_rate").notNull().default(0),
+  vendorProcessingFee: real("vendor_processing_fee").notNull().default(0),
   updatedAt: text("updated_at").notNull(),
 })

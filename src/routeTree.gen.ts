@@ -9,11 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PricingStrategyRouteImport } from './routes/pricing-strategy'
 import { Route as Import_productsRouteImport } from './routes/import_products'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsProductIdRouteImport } from './routes/products.$productId'
 import { Route as ApiDownloadImagesRouteImport } from './routes/api/download-images'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingStrategyRoute = PricingStrategyRouteImport.update({
+  id: '/pricing-strategy',
+  path: '/pricing-strategy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Import_productsRoute = Import_productsRouteImport.update({
   id: '/import_products',
   path: '/import_products',
@@ -38,12 +50,16 @@ const ApiDownloadImagesRoute = ApiDownloadImagesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/import_products': typeof Import_productsRoute
+  '/pricing-strategy': typeof PricingStrategyRoute
+  '/settings': typeof SettingsRoute
   '/api/download-images': typeof ApiDownloadImagesRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/import_products': typeof Import_productsRoute
+  '/pricing-strategy': typeof PricingStrategyRoute
+  '/settings': typeof SettingsRoute
   '/api/download-images': typeof ApiDownloadImagesRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
@@ -51,6 +67,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/import_products': typeof Import_productsRoute
+  '/pricing-strategy': typeof PricingStrategyRoute
+  '/settings': typeof SettingsRoute
   '/api/download-images': typeof ApiDownloadImagesRoute
   '/products/$productId': typeof ProductsProductIdRoute
 }
@@ -59,14 +77,24 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/import_products'
+    | '/pricing-strategy'
+    | '/settings'
     | '/api/download-images'
     | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/import_products' | '/api/download-images' | '/products/$productId'
+  to:
+    | '/'
+    | '/import_products'
+    | '/pricing-strategy'
+    | '/settings'
+    | '/api/download-images'
+    | '/products/$productId'
   id:
     | '__root__'
     | '/'
     | '/import_products'
+    | '/pricing-strategy'
+    | '/settings'
     | '/api/download-images'
     | '/products/$productId'
   fileRoutesById: FileRoutesById
@@ -74,12 +102,28 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   Import_productsRoute: typeof Import_productsRoute
+  PricingStrategyRoute: typeof PricingStrategyRoute
+  SettingsRoute: typeof SettingsRoute
   ApiDownloadImagesRoute: typeof ApiDownloadImagesRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing-strategy': {
+      id: '/pricing-strategy'
+      path: '/pricing-strategy'
+      fullPath: '/pricing-strategy'
+      preLoaderRoute: typeof PricingStrategyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/import_products': {
       id: '/import_products'
       path: '/import_products'
@@ -114,6 +158,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Import_productsRoute: Import_productsRoute,
+  PricingStrategyRoute: PricingStrategyRoute,
+  SettingsRoute: SettingsRoute,
   ApiDownloadImagesRoute: ApiDownloadImagesRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
 }

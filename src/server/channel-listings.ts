@@ -1,14 +1,17 @@
 import { createServerFn } from "@tanstack/react-start"
 import { and, eq } from "drizzle-orm"
-import type { ChannelId, ChannelListing, ChannelListingPatch } from "@/types/channel-listing"
+import type { ChannelId, ChannelListing, ChannelListingPatch, EtsyListingFields } from "@/types/channel-listing"
 import { defaultEtsyFields } from "@/lib/channel-registry"
 import { db } from "@/server/db/client"
-import { channelListings } from "@/server/db/schema"
+import { channelDefaults, channelListings } from "@/server/db/schema"
 
-function fieldsForChannel(channel: ChannelId) {
+function fieldsForChannel(channel: ChannelId): EtsyListingFields {
   switch (channel) {
-    case "etsy":
-      return defaultEtsyFields()
+    case "etsy": {
+      const row = db.select().from(channelDefaults).where(eq(channelDefaults.channel, "etsy")).get()
+      const defaults = row?.fields ?? defaultEtsyFields()
+      return { ...defaults, tags: [], materials: [] }
+    }
   }
 }
 

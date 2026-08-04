@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router"
-import { Boxes, Tag, Upload } from "lucide-react"
+import { Boxes, Calculator, Settings, Tag, Upload } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -66,6 +66,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link to="/import_products">
                     <Upload />
                     <span>Import Products</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/pricing-strategy"}
+                >
+                  <Link to="/pricing-strategy">
+                    <Calculator />
+                    <span>Pricing Strategy</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location.pathname === "/settings"}>
+                  <Link to="/settings">
+                    <Settings />
+                    <span>Settings</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
